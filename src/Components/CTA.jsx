@@ -25,7 +25,7 @@ export default function FloatingSocialButtons() {
       >
         <MessageCircle className="w-6 h-6 flex-shrink-0" />
         <span className={`ml-2 whitespace-nowrap font-medium transition-opacity duration-300 ${hoveredButton === 'whatsapp' ? 'opacity-100' : 'opacity-0 absolute'}`}>
-          Chat with us
+          Chat 
         </span>
       </button>
 
@@ -48,7 +48,7 @@ export default function FloatingSocialButtons() {
       >
         <Instagram className="w-6 h-6 flex-shrink-0" />
         <span className={`ml-2 whitespace-nowrap font-medium transition-opacity duration-300 ${hoveredButton === 'instagram' ? 'opacity-100' : 'opacity-0 absolute'}`}>
-          Follow us
+        Follow
         </span>
       </button>
     </div>
