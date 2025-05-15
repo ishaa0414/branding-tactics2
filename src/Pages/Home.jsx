@@ -1,29 +1,55 @@
-import React from 'react'
-import {Navbar} from '../Components/Navbar'
-import LoaderHomePage from '../Components/LoaderHomePage'
-import BookCall from '../Components/BookCall'
-import BuildingBrandGrid from '../Components/BuildingBrandGrid'
+import React, { lazy, Suspense } from 'react';
 
-import VisionaryBrand from '../Components/VisionaryBrand'
-import ProjectHome from '../Components/ProjectHome'
-import About from '../Components/About'
-import GetInTouch from '../Components/GetInTouch'
-import Services from '../Components/Services'
-import Footer from '../Components/Footer'
+// Import only the footer component eagerly as it appears on initial render
+import Footer from '../Components/Footer';
+
+// Lazy load all other components
+const VisionaryBrand = lazy(() => import('../Components/VisionaryBrand'));
+const Services = lazy(() => import('../Components/Services'));
+const BuildingBrandGrid = lazy(() => import('../Components/BuildingBrandGrid'));
+const ProjectHome = lazy(() => import('../Components/ProjectHome'));
+const About = lazy(() => import('../Components/About'));
+const GetInTouch = lazy(() => import('../Components/GetInTouch'));
+
+// Create a simple loading component
+const LoadingFallback = () => <div className="component-loading">Loading...</div>;
+
 const Home = () => {
   return (
     <div>
-      {/* <Navbar/>
+      {/* Commented components - keeping for reference
+      <Navbar/>
       <LoaderHomePage/>
-      <BookCall/> */} 
-      <VisionaryBrand />
-      <Services/>
-      <BuildingBrandGrid/> 
-      <ProjectHome/>
-      <About/>
-      <GetInTouch/>
-    <Footer/>
+      <BookCall/> 
+      */}
+      
+      <Suspense fallback={<LoadingFallback />}>
+        <VisionaryBrand />
+      </Suspense>
+      
+      <Suspense fallback={<LoadingFallback />}>
+        <Services />
+      </Suspense>
+      
+      <Suspense fallback={<LoadingFallback />}>
+        <BuildingBrandGrid />
+      </Suspense>
+      
+      <Suspense fallback={<LoadingFallback />}>
+        <ProjectHome />
+      </Suspense>
+      
+      <Suspense fallback={<LoadingFallback />}>
+        <About />
+      </Suspense>
+      
+      <Suspense fallback={<LoadingFallback />}>
+        <GetInTouch />
+      </Suspense>
+      
+      <Footer />
     </div>
-  )
-}
-export default Home
+  );
+};
+
+export default Home;

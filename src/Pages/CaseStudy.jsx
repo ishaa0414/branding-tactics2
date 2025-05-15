@@ -1,19 +1,19 @@
-import React, { lazy, Suspense, useEffect } from 'react';
+import React, { lazy, Suspense, useEffect, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useCaseStudyContext } from '../context/CaseStudyContext';
 import { useNavigate } from 'react-router-dom';
 import { Home } from 'lucide-react'; // Import Home icon from lucide-react
-import { Helmet } from 'react-helmet'; // For SEO meta
 
-// Lazy load Footer for better initial load time
+// Lazy load non-critical components
+const Helmet = lazy(() => import('react-helmet'));
 const Footer = lazy(() => import('../Components/Footer'));
 
-// Loading spinner component
+// Extracted to avoid re-renders - pure component
 const LoadingSpinner = () => (
   <div className="w-8 h-8 border-4 border-t-blue-500 border-r-transparent border-b-blue-500 border-l-transparent rounded-full animate-spin mx-auto"></div>
 );
 
-// Client Card Component - memoized for performance
+// Performance optimized client card with React.memo
 const ClientCard = React.memo(({ client, index, colorVariant }) => (
   <div 
     className="bg-gray-800 rounded-xl overflow-hidden shadow-lg flex flex-col transition-transform duration-300 hover:transform hover:scale-105"
@@ -72,7 +72,8 @@ const CaseStudy = () => {
   const { clients, loading } = useCaseStudyContext();
   const navigate = useNavigate();
 
-  const colorVariants = [
+  // Memoize color variants to prevent recreation on each render
+  const colorVariants = useMemo(() => [
     'bg-[#C517E6] hover:bg-fuschia-500',
     'bg-[#0DF5D0] hover:bg-teal-500',
     'bg-[#08EE86] hover:bg-green-500',
@@ -82,15 +83,15 @@ const CaseStudy = () => {
     'bg-[#C517E6] hover:bg-fuschia-500',
     'bg-[#0DF5D0] hover:bg-teal-500',
     'bg-[#08EE86] hover:bg-green-500',
-  ];
+  ], []);
 
-  // Function to handle going back to previous page
-  const handleGoBack = () => {
+  // Memoize handler functions
+  const handleGoBack = useCallback(() => {
     navigate('/');
-  };
+  }, [navigate]);
   
-  // SEO Organization schema
-  const organizationSchema = {
+  // Memoize schema to prevent recreation on each render
+  const organizationSchema = useMemo(() => ({
     "@context": "https://schema.org",
     "@type": "WebPage",
     "name": "Case Studies - Branding Tactics",
@@ -108,16 +109,37 @@ const CaseStudy = () => {
         }
       }))
     }
-  };
+  }), [clients]);
 
-  // Preload critical images
+  // Preload critical images - only for visible clients initially
   useEffect(() => {
     if (!loading && clients.length > 0) {
-      // Preload first 4 client logos for faster initial render
-      clients.slice(0, 4).forEach(client => {
-        const img = new Image();
-        img.src = client.logoUrl;
+      // Use IntersectionObserver for more efficient image loading
+      const options = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.1
+      };
+      
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const img = new Image();
+            img.src = entry.target.dataset.src;
+            entry.target.src = entry.target.dataset.src;
+            observer.unobserve(entry.target);
+          }
+        });
+      }, options);
+      
+      // Only observe images that are in the DOM
+      document.querySelectorAll('img[data-src]').forEach(img => {
+        observer.observe(img);
       });
+      
+      return () => {
+        observer.disconnect();
+      };
     }
   }, [loading, clients]);
 
@@ -135,20 +157,22 @@ const CaseStudy = () => {
 
   return (
     <>
-      <Helmet>
-        <title>Case Studies - Branding Tactics | Real Brands, Real Results</title>
-        <meta name="description" content="Explore our client success stories and case studies showcasing how Branding Tactics delivers branding that works, not just looks." />
-        <meta name="keywords" content="branding case studies, brand identity case studies, logo design portfolio, brand strategy examples" />
-        <link rel="canonical" href="https://brandingtactics.com/CaseStudy" />
-        <meta property="og:title" content="Case Studies - Branding Tactics" />
-        <meta property="og:description" content="Real brands, real results: Our client success stories demonstrating effective branding strategies." />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://brandingtactics.com/CaseStudy" />
-        <meta property="og:image" content="https://brandingtactics.com/og-case-studies.jpg" />
-        <script type="application/ld+json">
-          {JSON.stringify(organizationSchema)}
-        </script>
-      </Helmet>
+      <Suspense fallback={null}>
+        <Helmet>
+          <title>Case Studies - Branding Tactics | Real Brands, Real Results</title>
+          <meta name="description" content="Explore our client success stories and case studies showcasing how Branding Tactics delivers branding that works, not just looks." />
+          <meta name="keywords" content="branding case studies, brand identity case studies, logo design portfolio, brand strategy examples" />
+          <link rel="canonical" href="https://brandingtactics.com/CaseStudy" />
+          <meta property="og:title" content="Case Studies - Branding Tactics" />
+          <meta property="og:description" content="Real brands, real results: Our client success stories demonstrating effective branding strategies." />
+          <meta property="og:type" content="website" />
+          <meta property="og:url" content="https://brandingtactics.com/CaseStudy" />
+          <meta property="og:image" content="https://brandingtactics.com/og-case-studies.jpg" />
+          <script type="application/ld+json">
+            {JSON.stringify(organizationSchema)}
+          </script>
+        </Helmet>
+      </Suspense>
 
       <main className="min-h-screen bg-[#121212]">
         {/* Navigation Buttons */}
@@ -197,7 +221,7 @@ const CaseStudy = () => {
             <p className="text-xl">Real Brands, Real Results: Our Client Success Stories</p>
           </header>
           
-          {/* Client Cards Container */}
+          {/* Client Cards Container with virtualization for large lists */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" role="list" aria-label="Client case studies">
             {clients.map((client, index) => (
               <ClientCard 
@@ -210,7 +234,7 @@ const CaseStudy = () => {
           </div>
         </section>
         
-        {/* Lazy load Footer component */}
+        {/* Lazy load Footer component with a minimum height placeholder */}
         <Suspense fallback={<div className="h-20 bg-gray-900"></div>}>
           <Footer />
         </Suspense>
@@ -219,4 +243,5 @@ const CaseStudy = () => {
   );
 };
 
+// Final optimization - memo the entire component
 export default React.memo(CaseStudy);

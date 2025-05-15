@@ -1,10 +1,13 @@
 User-agent: *
 Allow: /
-
-# Sitemap location
-Sitemap: https://branding-tactics-deployment.vercel.app/sitemap.xml
-
-# Block access to sensitive areas (if needed)
 Disallow: /admin/
 Disallow: /private/
-Disallow: /dev/
+Disallow: /temporary/
+
+# Allow important directories
+Allow: /images/
+Allow: /css/
+Allow: /js/
+
+# Sitemap location
+Sitemap: https://www.brandingtactics.in/sitemap.xml

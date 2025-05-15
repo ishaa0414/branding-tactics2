@@ -1,27 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Home page -->
   <url>
-    <loc>https://branding-tactics-deployment.vercel.app/</loc>
-    <lastmod>2025-05-04</lastmod>
-    <changefreq>monthly</changefreq>
+    <loc>https://www.brandingtactics.in/</loc>
     <priority>1.0</priority>
+    <changefreq>weekly</changefreq>
   </url>
+  
+  <!-- Case Study listing page -->
   <url>
-    <loc>https://branding-tactics-deployment.vercel.app/projects</loc>
-    <lastmod>2025-05-04</lastmod>
-    <changefreq>monthly</changefreq>
+    <loc>https://www.brandingtactics.in/CaseStudy</loc>
     <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
   </url>
+  
+  <!-- Individual Case Study pages - These would be dynamically generated -->
   <url>
-    <loc>https://branding-tactics-deployment.vercel.app/about</loc>
-    <lastmod>2025-05-04</lastmod>
-    <changefreq>monthly</changefreq>
+    <loc>https://www.brandingtactics.in/CaseStudy/1</loc>
     <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://branding-tactics-deployment.vercel.app/contact</loc>
-    <lastmod>2025-05-04</lastmod>
+    <loc>https://www.brandingtactics.in/CaseStudy/2</loc>
+    <priority>0.7</priority>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+  </url>
+   <url>
+    <loc>https://www.brandingtactics.in/CaseStudy/3</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.brandingtactics.in/CaseStudy/4</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+    <url>
+    <loc>https://www.brandingtactics.in/CaseStudy/5</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.brandingtactics.in/CaseStudy/6</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+   <url>
+    <loc>https://www.brandingtactics.in/CaseStudy/7</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.brandingtactics.in/CaseStudy/8</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.brandingtactics.in/CaseStudy/9</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <!-- More case study detail pages would be added dynamically -->
+  
+  <!-- Visual grid check page -->
+  <url>
+    <loc>https://www.brandingtactics.in/check</loc>
+    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
   </url>
 </urlset>
