@@ -1,30 +1,3 @@
-// import ReactDOM from "react-dom/client";
-// import {  Routes, Route } from "react-router-dom";
-// import Home from "./Pages/Home";
-// import ProjectList from "./Pages/ProjectList";
-// import ProjectShowcase from "./Pages/ProjectShowcase";
-// import Navbar from "./Components/Navbar";
-
-// function App() {
- 
-
-//   return (
-//     <>
-    
-//       <Routes>
-//         <Route path="/" element={<Home/>}>
-//           {/* <Navbar/> */}
-//           <Route path="/project-list" element={<ProjectList />} />
-//           <Route path="project-show" element={<ProjectShowcase />} />
-        
-//         </Route>
-//       </Routes>
-   
-//     </>
-//   )
-// }
-
-// export default App
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import Home from './Pages/Home'
@@ -34,22 +7,22 @@ import { CaseStudyProvider } from './context/CaseStudyContext'
 import CaseStudyDetail from './Pages/ProjectShowcase'
 import TopImageGrid from './Components/bentogrid'
 import SocialCTAButtons from './Components/CTA'
-import NotFound from './Pages/NotFound'  // Import the NotFound component
+import NotFound from './Pages/NotFound'
 
 function App() {
   return (
     <>
       <div className="border-box bg-[#121212]">
-        <SocialCTAButtons/>
+        <SocialCTAButtons />
         <CaseStudyProvider>
-        {/* <Navbar /> */}
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/CaseStudy" element={<CaseStudy />} />
-          <Route path="/CaseStudy/:id" element={<CaseStudyDetail />}/>
-          <Route path="/check" element={<TopImageGrid />}/>
-          <Route path="*" element={<NotFound />} />  {/* Add this catch-all route */}
-        </Routes>
+          {/* <Navbar /> */}
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/CaseStudy" element={<CaseStudy />} />
+            <Route path="/CaseStudy/:slug" element={<CaseStudyDetail />} />
+            <Route path="/check" element={<TopImageGrid />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </CaseStudyProvider>
       </div>
     </>
