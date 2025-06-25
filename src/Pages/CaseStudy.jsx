@@ -1,89 +1,254 @@
-import React, { lazy, Suspense, useEffect, useCallback, useMemo } from 'react';
+import React, { lazy, Suspense, useEffect, useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCaseStudyContext } from '../context/CaseStudyContext';
 import { useNavigate } from 'react-router-dom';
-import { Home } from 'lucide-react'; // Import Home icon from lucide-react
+import { Home, ArrowLeft, ExternalLink, Eye } from 'lucide-react';
 
 // Lazy load non-critical components
 const Helmet = lazy(() => import('react-helmet'));
 const Footer = lazy(() => import('../Components/Footer'));
 
-// Extracted to avoid re-renders - pure component
+// Minimal Loading Spinner
 const LoadingSpinner = () => (
-  <div className="w-8 h-8 border-4 border-t-blue-500 border-r-transparent border-b-blue-500 border-l-transparent rounded-full animate-spin mx-auto"></div>
+  <div className="flex items-center justify-center">
+    <div className="w-8 h-8 border-2 border-gray-300 border-t-white rounded-full animate-spin"></div>
+  </div>
 );
 
-// Performance optimized client card with React.memo - UPDATED: Now uses slug
-const ClientCard = React.memo(({ client, index, colorVariant, getSlugFromName }) => (
-  <div 
-    className="bg-gray-800 rounded-xl overflow-hidden shadow-lg flex flex-col transition-transform duration-300 hover:transform hover:scale-105"
-    itemScope
-    itemType="https://schema.org/Organization"
-  >
-    {/* Image Container - Fixed height for consistency */}
-    <div className="h-48 bg-[#FFFFFF] flex items-center justify-center p-6">
-      <img 
-        src={client.logoUrl} 
-        alt={`${client.name} Logo`} 
-        className="max-h-full max-w-full object-contain"
-        loading="lazy"
-        width="200"
-        height="100"
-        itemProp="logo"
-        // Fallback to placeholder if image fails to load
-        onError={(e) => {
-          e.target.src = "/api/placeholder/200/100";
-          e.target.alt = "Logo placeholder";
+// Enhanced Client Card with high-contrast sophisticated colors
+const ClientCard = React.memo(({ client, index, getSlugFromName }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  
+  // Enhanced color palette with higher contrast and vibrancy
+  const colors = [
+    { 
+      primary: "rgba(159, 94, 186, 0.15)", // Brighter muted purple - increased opacity
+      accent: "rgba(159, 94, 186, 0.9)", // Much higher opacity for accent
+      border: "rgba(159, 94, 186, 0.4)", // Increased border visibility
+      glow: "rgba(197, 23, 230, 0.25)", // Stronger glow
+      hoverAccent: "rgba(197, 23, 230, 1)" // Pure vibrant hover color
+    },
+    { 
+      primary: "rgba(214, 89, 127, 0.15)", // Brighter muted rose
+      accent: "rgba(214, 89, 127, 0.9)",
+      border: "rgba(214, 89, 127, 0.4)",
+      glow: "rgba(255, 23, 108, 0.25)",
+      hoverAccent: "rgba(255, 23, 108, 1)"
+    },
+    { 
+      primary: "rgba(94, 185, 162, 0.15)", // Brighter muted teal
+      accent: "rgba(94, 185, 162, 0.9)",
+      border: "rgba(94, 185, 162, 0.4)",
+      glow: "rgba(13, 245, 208, 0.25)",
+      hoverAccent: "rgba(13, 245, 208, 1)"
+    },
+    { 
+      primary: "rgba(214, 193, 91, 0.15)", // Brighter muted gold
+      accent: "rgba(214, 193, 91, 0.9)",
+      border: "rgba(214, 193, 91, 0.4)",
+      glow: "rgba(255, 225, 31, 0.25)",
+      hoverAccent: "rgba(255, 225, 31, 1)"
+    },
+    { 
+      primary: "rgba(214, 116, 81, 0.15)", // Brighter muted orange
+      accent: "rgba(214, 116, 81, 0.9)",
+      border: "rgba(214, 116, 81, 0.4)",
+      glow: "rgba(255, 75, 25, 0.25)",
+      hoverAccent: "rgba(255, 75, 25, 1)"
+    },
+    { 
+      primary: "rgba(127, 111, 214, 0.15)", // Brighter muted blue
+      accent: "rgba(127, 111, 214, 0.9)",
+      border: "rgba(127, 111, 214, 0.4)",
+      glow: "rgba(75, 25, 255, 0.25)",
+      hoverAccent: "rgba(75, 25, 255, 1)"
+    },
+  ];
+  
+  const colorScheme = colors[index % colors.length];
+
+  return (
+    <article 
+      className="group relative cursor-pointer transform transition-all duration-500 ease-out"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        transform: isHovered ? 'translateY(-8px)' : 'translateY(0)', // Increased lift
+      }}
+      itemScope
+      itemType="https://schema.org/Organization"
+    >
+      {/* Enhanced glow effect with higher intensity */}
+      <div 
+        className="absolute inset-0 rounded-lg transition-all duration-500 -z-10"
+        style={{
+          background: isHovered 
+            ? `radial-gradient(circle at 50% 50%, ${colorScheme.glow}, transparent 60%)`
+            : 'transparent',
+          transform: 'translate(0, 0)',
+          opacity: isHovered ? 1 : 0,
+          filter: 'blur(25px)', // Increased blur for stronger glow
+          scale: isHovered ? '1.15' : '1' // Larger scale
         }}
       />
-    </div>
-    
-    {/* Content Area */}
-    <div className="p-4 flex-grow">
-      <h3 className="text-white font-semibold text-lg mb-2 truncate" itemProp="name">{client.name}</h3>
-      <p className="text-gray-300 text-sm mb-4 line-clamp-3" itemProp="description">
-        {client.description}
-      </p>
-    </div>
-    
-    {/* Button Area - UPDATED: Now uses slug instead of ID */}
-    <div className="p-4 pt-0 flex justify-start">
-      <Link 
-        to={`/caseStudy/${getSlugFromName(client.name)}`}
-        className={`
-          inline-block w-2/3 text-center px-4 py-2 rounded-full 
-          transition-all duration-300 
-          border border-transparent
-          ${colorVariant}
-          text-[#1E1E1E]
-          hover:border-white hover:shadow-lg
-          text-sm font-medium
-        `}
-        aria-label={`View case study for ${client.name}`}
+      
+      {/* Enhanced shadow with more prominent color */}
+      <div 
+        className="absolute inset-0 rounded-lg transition-all duration-500 -z-5"
+        style={{
+          backgroundColor: isHovered ? colorScheme.primary : 'rgba(255, 255, 255, 0.05)',
+          transform: 'translate(3px, 3px)', // Slightly larger offset
+          opacity: isHovered ? 0.6 : 0.2, // Higher opacity
+          filter: 'blur(2px)'
+        }}
+      />
+      
+      {/* Main card with enhanced dynamic border */}
+      <div 
+        className="relative bg-[#1A1A1A] rounded-lg overflow-hidden transition-all duration-500 flex flex-col h-full"
+        style={{
+          border: `2px solid ${isHovered ? colorScheme.border : '#2A2A2A'}`, // Thicker border
+          boxShadow: isHovered 
+            ? `0 12px 40px ${colorScheme.primary}, 0 0 0 2px ${colorScheme.border}, inset 0 1px 0 ${colorScheme.glow}`
+            : 'none',
+          background: isHovered 
+            ? `linear-gradient(135deg, #1A1A1A 0%, ${colorScheme.primary} 100%)`
+            : '#1A1A1A'
+        }}
       >
-        View Case Study
-      </Link>
-    </div>
-  </div>
-));
+        {/* Image Container with enhanced color overlay */}
+        <div className="relative h-48 overflow-hidden">
+          <img 
+            src={client.caseStudyCover} 
+            alt={`${client.name} case study cover`} 
+            className="w-full h-full object-cover transition-all duration-500"
+            style={{
+              transform: isHovered ? 'scale(1.08)' : 'scale(1)', // Increased scale
+              filter: isHovered 
+                ? `brightness(1.2) contrast(1.1) saturate(1.3)` // Enhanced image effects
+                : 'brightness(0.85) grayscale(0.4)' // More contrast in default state
+            }}
+            loading="lazy"
+            itemProp="image"
+            onError={(e) => {
+              e.target.src = "/api/placeholder/400/192";
+              e.target.alt = "Case study cover placeholder";
+            }}
+          />
+          
+          {/* Enhanced color overlay with gradient */}
+          <div 
+            className="absolute inset-0 transition-all duration-500"
+            style={{
+              background: isHovered 
+                ? `linear-gradient(135deg, ${colorScheme.primary} 0%, ${colorScheme.glow} 100%)`
+                : 'linear-gradient(135deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.2) 100%)',
+              opacity: isHovered ? 0.7 : 0.3 // Higher opacity overlay
+            }}
+          />
+          
+          {/* Enhanced view indicator with pulsing effect */}
+          <div 
+            className="absolute top-3 right-3 backdrop-blur-sm rounded-full p-2 transition-all duration-500"
+            style={{
+              background: isHovered 
+                ? `linear-gradient(135deg, ${colorScheme.hoverAccent}, ${colorScheme.accent})`
+                : 'rgba(0, 0, 0, 0.6)',
+              opacity: isHovered ? 1 : 0,
+              transform: isHovered ? 'scale(1.1) rotate(0deg)' : 'scale(0.8) rotate(-10deg)',
+              boxShadow: isHovered ? `0 0 15px ${colorScheme.glow}` : 'none'
+            }}
+          >
+            <Eye className="w-4 h-4 text-white" style={{
+              filter: isHovered ? 'drop-shadow(0 0 3px rgba(255,255,255,0.5))' : 'none'
+            }} />
+          </div>
+        </div>
+        
+        {/* Content Area with enhanced color hints */}
+        <div className="p-6 flex-grow flex flex-col">
+          {/* Enhanced dynamic accent line */}
+          <div 
+            className="h-0.5 mb-4 transition-all duration-500 rounded-full" // Thicker line
+            style={{
+              background: isHovered 
+                ? `linear-gradient(90deg, ${colorScheme.hoverAccent} 0%, ${colorScheme.accent} 70%, transparent 100%)`
+                : 'linear-gradient(90deg, #505050 0%, transparent 100%)', // Brighter default
+              width: isHovered ? '65%' : '35%', // Wider line
+              boxShadow: isHovered ? `0 0 8px ${colorScheme.glow}` : 'none'
+            }}
+          />
+          
+          <h3 
+            className="font-semibold text-lg mb-3 transition-all duration-500"
+            style={{
+              color: isHovered ? '#FFFFFF' : '#E5E5E5',
+              transform: isHovered ? 'translateX(6px)' : 'translateX(0)', // More movement
+              textShadow: isHovered ? `0 0 25px ${colorScheme.glow}` : 'none', // Stronger text glow
+              fontWeight: isHovered ? '600' : '500' // Bolder on hover
+            }}
+            itemProp="name"
+          >
+            {client.name}
+          </h3>
+          
+          <p 
+            className="text-sm leading-relaxed mb-6 line-clamp-3 transition-all duration-500"
+            style={{
+              color: isHovered ? '#E0E0E0' : '#9CA3AF' // Brighter text on hover
+            }}
+            itemProp="description"
+          >
+            {client.description}
+          </p>
+          
+          {/* Enhanced CTA button with stronger effects */}
+          <div className="mt-auto">
+            <Link 
+              to={`/caseStudy/${getSlugFromName(client.name)}`}
+              className="group/button inline-flex items-center text-sm font-medium transition-all duration-500"
+              style={{
+                color: isHovered ? colorScheme.hoverAccent : '#9CA3AF',
+                textShadow: isHovered ? `0 0 10px ${colorScheme.glow}` : 'none'
+              }}
+              aria-label={`View case study for ${client.name}`}
+            >
+              <span className="relative mr-2 font-medium">
+                View Case Study
+                <div 
+                  className="absolute bottom-0 left-0 h-0.5 transition-all duration-500 rounded-full"
+                  style={{
+                    background: isHovered ? colorScheme.hoverAccent : colorScheme.accent,
+                    width: isHovered ? '100%' : '0%',
+                    boxShadow: isHovered ? `0 0 6px ${colorScheme.glow}` : 'none'
+                  }}
+                />
+              </span>
+              <ExternalLink 
+                className="w-3 h-3 transition-all duration-500" 
+                style={{
+                  transform: isHovered ? 'translateX(4px) scale(1.15)' : 'translateX(0) scale(1)', // More movement
+                  filter: isHovered ? `drop-shadow(0 0 6px ${colorScheme.glow})` : 'none'
+                }}
+              />
+            </Link>
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+});
 
 const CaseStudy = () => {
-  // Get clients data from context - UPDATED: Added getSlugFromName
   const { clients, loading, getSlugFromName } = useCaseStudyContext();
   const navigate = useNavigate();
+  const [headerVisible, setHeaderVisible] = useState(false);
 
-  // Memoize color variants to prevent recreation on each render
-  const colorVariants = useMemo(() => [
-    'bg-[#C517E6] hover:bg-fuschia-500',
-    'bg-[#0DF5D0] hover:bg-teal-500',
-    'bg-[#08EE86] hover:bg-green-500',
-    'bg-[#FFE11F] hover:bg-yellow-400',
-    'bg-[#FF4B19] hover:bg-orange-500',
-    'bg-[#FF176C] hover:bg-pink-500',
-    'bg-[#C517E6] hover:bg-fuschia-500',
-    'bg-[#0DF5D0] hover:bg-teal-500',
-    'bg-[#08EE86] hover:bg-green-500',
-  ], []);
+  // Animate header on mount
+  useEffect(() => {
+    const timer = setTimeout(() => setHeaderVisible(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Memoize handler functions
   const handleGoBack = useCallback(() => {
@@ -112,45 +277,14 @@ const CaseStudy = () => {
     }
   }), [clients, getSlugFromName]);
 
-  // Preload critical images - only for visible clients initially
-  useEffect(() => {
-    if (!loading && clients.length > 0) {
-      // Use IntersectionObserver for more efficient image loading
-      const options = {
-        root: null,
-        rootMargin: '0px',
-        threshold: 0.1
-      };
-      
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            const img = new Image();
-            img.src = entry.target.dataset.src;
-            entry.target.src = entry.target.dataset.src;
-            observer.unobserve(entry.target);
-          }
-        });
-      }, options);
-      
-      // Only observe images that are in the DOM
-      document.querySelectorAll('img[data-src]').forEach(img => {
-        observer.observe(img);
-      });
-      
-      return () => {
-        observer.disconnect();
-      };
-    }
-  }, [loading, clients]);
-
-  // Loading state
+  // Minimal loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-[#121212] flex items-center justify-center">
-        <div className="text-white text-xl flex flex-col items-center">
+        <div className="text-center">
           <LoadingSpinner />
-          <p className="mt-4">Loading case studies...</p>
+          <p className="mt-6 text-white text-lg">Loading case studies...</p>
+          <p className="mt-2 text-gray-400 text-sm">Preparing our work to show you</p>
         </div>
       </div>
     );
@@ -176,74 +310,232 @@ const CaseStudy = () => {
       </Suspense>
 
       <main className="min-h-screen bg-[#121212]">
-        {/* Navigation Buttons */}
-        <nav className="max-w-7xl mx-auto pt-6 px-6 flex justify-between items-center" aria-label="Case study navigation">
-          {/* Go Back Button */}
-          <button
-            onClick={handleGoBack}
-            className="flex items-center text-white bg-gray-800 hover:bg-gray-700 transition-colors duration-300 px-4 py-2 rounded-lg mb-6"
-            aria-label="Go back to previous page"
-          >
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-5 w-5 mr-2" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-              aria-hidden="true"
+        {/* Enhanced Navigation with stronger color accents */}
+        <nav 
+          className="sticky top-0 z-50 backdrop-blur-md border-b bg-[#121212]/90"
+          style={{
+            borderColor: 'rgba(127, 111, 214, 0.2)', // More visible border
+            background: 'linear-gradient(135deg, #121212 0%, rgba(127, 111, 214, 0.04) 100%)'
+          }}
+          aria-label="Case study navigation"
+        >
+          <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            {/* Enhanced Back Button with stronger hover effects */}
+            <button
+              onClick={handleGoBack}
+              className="group flex items-center px-4 py-2 text-sm font-medium transition-all duration-300 text-gray-400 hover:text-white rounded-lg"
+              style={{
+                background: 'transparent',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'rgba(127, 111, 214, 0.2)'; // Stronger background
+                e.target.style.boxShadow = '0 0 25px rgba(127, 111, 214, 0.15)'; // Stronger glow
+                e.target.style.color = '#FFFFFF';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'transparent';
+                e.target.style.boxShadow = 'none';
+                e.target.style.color = '#9CA3AF';
+              }}
+              aria-label="Go back to previous page"
             >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={2} 
-                d="M10 19l-7-7m0 0l7-7m-7 7h18" 
-              />
-            </svg>
-            Go Back
-          </button>
-          
-          {/* Home Button */}
-          <Link 
-            to="/" 
-            className="flex items-center text-white bg-gray-800 hover:bg-gray-700 transition-colors duration-300 px-4 py-2 rounded-lg mb-6"
-            aria-label="Go to homepage"
-          >
-            <Home className="h-5 w-5 mr-2" aria-hidden="true" />
-            Home
-          </Link>
+              <ArrowLeft className="h-4 w-4 mr-2 transition-transform duration-300 group-hover:-translate-x-1" />
+              <span>Back</span>
+            </button>
+            
+            {/* Enhanced Home Button with stronger hover effects */}
+            <Link 
+              to="/" 
+              className="group flex items-center px-4 py-2 text-sm font-medium transition-all duration-300 text-gray-400 hover:text-white rounded-lg"
+              style={{
+                background: 'transparent',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'rgba(94, 185, 162, 0.2)'; // Stronger background
+                e.target.style.boxShadow = '0 0 25px rgba(94, 185, 162, 0.15)'; // Stronger glow
+                e.target.style.color = '#FFFFFF';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'transparent';
+                e.target.style.boxShadow = 'none';
+                e.target.style.color = '#9CA3AF';
+              }}
+              aria-label="Go to homepage"
+            >
+              <Home className="h-4 w-4 mr-2 transition-transform duration-300 group-hover:scale-105" />
+              <span>Home</span>
+            </Link>
+          </div>
         </nav>
         
-        <section className="max-w-7xl mx-auto px-6 pb-6">
-          {/* Header Section */}
-          <header className="text-center text-white mb-12">
-            <h1 className="text-4xl font-bold mb-4">
-              "Branding That Works, Not Just Looks."
-            </h1>
-            <p className="text-xl">Real Brands, Real Results: Our Client Success Stories</p>
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          {/* Enhanced Header Section */}
+          <header 
+            className="text-center mb-16 transition-all duration-800"
+            style={{
+              opacity: headerVisible ? 1 : 0,
+              transform: headerVisible ? 'translateY(0)' : 'translateY(20px)'
+            }}
+          >
+            <div className="flex-col text-center justify-center items-center mt-10 mb-10">
+              <p 
+                className="text-lg mb-2 transition-all duration-800 delay-100 font-medium"
+                style={{
+                  color: headerVisible ? 'rgba(159, 94, 186, 0.9)' : '#6B7280', // Brighter accent
+                  textShadow: headerVisible ? '0 0 15px rgba(159, 94, 186, 0.3)' : 'none'
+                }}
+              >
+                Real Brands, Real Results
+              </p>
+              <h1 
+                className="text-4xl md:text-5xl font-light mb-6 transition-all duration-800 delay-200"
+                style={{
+                  color: '#FFFFFF',
+                  textShadow: headerVisible ? '0 0 50px rgba(159, 94, 186, 0.2)' : 'none' // Stronger text glow
+                }}
+              >
+                Our Client Success Stories
+              </h1>
+            </div>
+            
+            <p className="text-base text-center mb-8 max-w-2xl mx-auto leading-relaxed text-gray-300">
+              Branding isn't just about looks—it's about how your brand speaks, feels, and connects with your audience. 
+              Explore case studies that demonstrate our strategic approach to building meaningful brand connections.
+            </p>
+            
+            {/* Enhanced accent line with stronger glow */}
+            <div 
+              className="h-px mx-auto transition-all duration-800 delay-400"
+              style={{
+                width: headerVisible ? '140px' : '0px', // Wider line
+                background: headerVisible 
+                  ? 'linear-gradient(90deg, transparent, rgba(159, 94, 186, 0.8), transparent)'
+                  : 'transparent',
+                boxShadow: headerVisible ? '0 0 20px rgba(159, 94, 186, 0.4)' : 'none' // Added glow
+              }}
+            />
           </header>
           
-          {/* Client Cards Container with virtualization for large lists */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" role="list" aria-label="Client case studies">
+          {/* Enhanced Grid Layout */}
+          <section 
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8" 
+            role="list" 
+            aria-label="Client case studies"
+          >
             {clients.map((client, index) => (
-              <ClientCard 
+              <div
                 key={client.id}
-                client={client}
-                index={index}
-                colorVariant={colorVariants[index % colorVariants.length]}
-                getSlugFromName={getSlugFromName}
-              />
+                style={{
+                  animation: `fadeInUp 0.6s ease-out forwards ${index * 0.08}s`,
+                  opacity: 0,
+                  transform: 'translateY(30px)'
+                }}
+              >
+                <ClientCard 
+                  client={client}
+                  index={index}
+                  getSlugFromName={getSlugFromName}
+                />
+              </div>
             ))}
-          </div>
-        </section>
+          </section>
+
+          {/* Enhanced Call to Action Section with stronger colors */}
+          {clients.length > 0 && (
+            <section className="mt-24 text-center">
+              <div 
+                className="relative p-12 rounded-xl transition-all duration-500 group"
+                style={{
+                  background: 'linear-gradient(135deg, #1A1A1A 0%, rgba(94, 185, 162, 0.08) 100%)',
+                  border: '2px solid rgba(94, 185, 162, 0.25)', // Thicker, more visible border
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 16px 64px rgba(94, 185, 162, 0.2)'; // Stronger glow
+                  e.currentTarget.style.transform = 'translateY(-4px)'; // More lift
+                  e.currentTarget.style.borderColor = 'rgba(94, 185, 162, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.2)';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.borderColor = 'rgba(94, 185, 162, 0.25)';
+                }}
+              >
+                <div className="relative z-10">
+                  <h2 
+                    className="text-2xl font-light mb-4 transition-all duration-300"
+                    style={{
+                      color: '#FFFFFF',
+                      textShadow: '0 0 25px rgba(94, 185, 162, 0.2)'
+                    }}
+                  >
+                    Ready to Join Our Success Stories?
+                  </h2>
+                  <p className="text-gray-300 text-base mb-8 max-w-xl mx-auto">
+                    Let's create something amazing together. Your brand deserves the same attention and results.
+                  </p>
+                  <Link
+                    to="/contact"
+                    className="group/cta inline-flex items-center text-sm font-medium transition-all duration-300 px-8 py-4 rounded-lg"
+                    style={{
+                      color: 'rgba(94, 185, 162, 0.9)',
+                      background: 'transparent',
+                      border: '2px solid rgba(94, 185, 162, 0.4)' // Thicker border
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = 'rgba(94, 185, 162, 0.15)'; // Stronger background
+                      e.target.style.color = '#FFFFFF';
+                      e.target.style.boxShadow = '0 0 30px rgba(94, 185, 162, 0.3)'; // Stronger glow
+                      e.target.style.borderColor = 'rgba(13, 245, 208, 0.6)'; // Brighter border
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = 'transparent';
+                      e.target.style.color = 'rgba(94, 185, 162, 0.9)';
+                      e.target.style.boxShadow = 'none';
+                      e.target.style.borderColor = 'rgba(94, 185, 162, 0.4)';
+                    }}
+                  >
+                    <span className="relative mr-2 font-medium">
+                      Start Your Project
+                    </span>
+                    <ExternalLink className="w-4 h-4 transition-transform duration-300 group-hover/cta:translate-x-1" />
+                  </Link>
+                </div>
+              </div>
+            </section>
+          )}
+        </div>
         
-        {/* Lazy load Footer component with a minimum height placeholder */}
-        <Suspense fallback={<div className="h-20 bg-gray-900"></div>}>
+        {/* Footer */}
+        <Suspense fallback={<div className="h-32 bg-[#1A1A1A]"></div>}>
           <Footer />
         </Suspense>
       </main>
+
+      {/* Enhanced CSS animations */}
+      <style jsx>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(30px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .line-clamp-3 {
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+      `}</style>
     </>
   );
 };
 
-// Final optimization - memo the entire component
 export default React.memo(CaseStudy);
