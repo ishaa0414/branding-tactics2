@@ -13,9 +13,10 @@ const LoadingIndicator = () => (
 );
 
 const CaseStudyDetail = () => {
-  const { id } = useParams();
+  // Changed from 'id' to 'slug' to match the new routing pattern
+  const { slug } = useParams();
   const [caseStudy, setCaseStudy] = useState(null);
-  const { getCaseStudyById, getRelatedCaseStudies, loading, setLoading } = useCaseStudyContext();
+  const { getCaseStudyBySlug, getRelatedCaseStudies, getSlugFromName, loading, setLoading } = useCaseStudyContext();
 
   // Optimized image loading with error handling
   const renderImage = useCallback((imageUrl, alt, className = "w-full h-full object-cover") => {
@@ -69,7 +70,7 @@ const CaseStudyDetail = () => {
     return caseStudy ? colorClasses[(caseStudy.id - 1) % colorClasses.length] : 'bg-blue-700';
   }, [caseStudy?.id]);
 
-  // Fetch case study data with proper cleanup
+  // Fetch case study data with proper cleanup - UPDATED to use slug
   useEffect(() => {
     // Track if component is mounted to prevent memory leaks
     let isMounted = true;
@@ -101,7 +102,8 @@ const CaseStudyDetail = () => {
     const fetchCaseStudy = async () => {
       setLoading(true);
       try {
-        const study = await getCaseStudyById(id);
+        // CHANGED: Using slug instead of ID
+        const study = await getCaseStudyBySlug(slug);
         if (isMounted && study) {
           setCaseStudy(study);
           updateMetadata(study);
@@ -119,7 +121,7 @@ const CaseStudyDetail = () => {
     return () => {
       isMounted = false;
     };
-  }, [id, getCaseStudyById, setLoading]);
+  }, [slug, getCaseStudyBySlug, setLoading]); // CHANGED: dependency from 'id' to 'slug'
 
   // Preconnect to external domains
   useEffect(() => {
@@ -331,14 +333,14 @@ const CaseStudyDetail = () => {
             </Suspense>
           </section>
           
-          {/* Related case studies - only render if there are any */}
+          {/* Related case studies - UPDATED to use slugs in links */}
           {relatedCaseStudies.length > 0 && (
             <section className="w-full max-w-6xl mx-auto p-6 bg-gray-100 mt-6 mb-6" aria-labelledby="related-heading">
               <h2 id="related-heading" className="text-2xl font-bold mb-4">Related Projects</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {relatedCaseStudies.map(study => (
                   <Link 
-                    to={`/caseStudy/${study.id}`} 
+                    to={`/caseStudy/${getSlugFromName(study.name)}`} // CHANGED: Using slug instead of ID
                     key={study.id}
                     className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
                     aria-label={`View case study for ${study.name}`}

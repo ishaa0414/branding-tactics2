@@ -20,7 +20,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/CaseStudy" element={<CaseStudy />} />
             <Route path="/CaseStudy/:slug" element={<CaseStudyDetail />} />
-            <Route path="/check" element={<TopImageGrid />} />
+            {/* <Route path="/check" element={<TopImageGrid />} /> */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </CaseStudyProvider>

@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from 'react';
 
 // Import only the footer component eagerly as it appears on initial render
 import Footer from '../Components/Footer';
+import Testimonials from '../Components/Testimonials';
 
 // Lazy load all other components
 const VisionaryBrand = lazy(() => import('../Components/VisionaryBrand'));
@@ -37,6 +38,9 @@ const Home = () => {
       
       <Suspense fallback={<LoadingFallback />}>
         <ProjectHome />
+      </Suspense>
+      <Suspense fallback={<LoadingFallback />}>
+        <Testimonials/>
       </Suspense>
       
       <Suspense fallback={<LoadingFallback />}>

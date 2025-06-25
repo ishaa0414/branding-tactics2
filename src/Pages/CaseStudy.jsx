@@ -13,8 +13,8 @@ const LoadingSpinner = () => (
   <div className="w-8 h-8 border-4 border-t-blue-500 border-r-transparent border-b-blue-500 border-l-transparent rounded-full animate-spin mx-auto"></div>
 );
 
-// Performance optimized client card with React.memo
-const ClientCard = React.memo(({ client, index, colorVariant }) => (
+// Performance optimized client card with React.memo - UPDATED: Now uses slug
+const ClientCard = React.memo(({ client, index, colorVariant, getSlugFromName }) => (
   <div 
     className="bg-gray-800 rounded-xl overflow-hidden shadow-lg flex flex-col transition-transform duration-300 hover:transform hover:scale-105"
     itemScope
@@ -46,10 +46,10 @@ const ClientCard = React.memo(({ client, index, colorVariant }) => (
       </p>
     </div>
     
-    {/* Button Area */}
+    {/* Button Area - UPDATED: Now uses slug instead of ID */}
     <div className="p-4 pt-0 flex justify-start">
       <Link 
-        to={`/CaseStudy/${client.id}`}
+        to={`/caseStudy/${getSlugFromName(client.name)}`}
         className={`
           inline-block w-2/3 text-center px-4 py-2 rounded-full 
           transition-all duration-300 
@@ -68,8 +68,8 @@ const ClientCard = React.memo(({ client, index, colorVariant }) => (
 ));
 
 const CaseStudy = () => {
-  // Get clients data from context
-  const { clients, loading } = useCaseStudyContext();
+  // Get clients data from context - UPDATED: Added getSlugFromName
+  const { clients, loading, getSlugFromName } = useCaseStudyContext();
   const navigate = useNavigate();
 
   // Memoize color variants to prevent recreation on each render
@@ -105,11 +105,12 @@ const CaseStudy = () => {
           "@type": "Organization",
           "name": client.name,
           "description": client.description,
-          "image": client.logoUrl
+          "image": client.logoUrl,
+          "url": `/caseStudy/${getSlugFromName(client.name)}`
         }
       }))
     }
-  }), [clients]);
+  }), [clients, getSlugFromName]);
 
   // Preload critical images - only for visible clients initially
   useEffect(() => {
@@ -162,11 +163,11 @@ const CaseStudy = () => {
           <title>Case Studies - Branding Tactics | Real Brands, Real Results</title>
           <meta name="description" content="Explore our client success stories and case studies showcasing how Branding Tactics delivers branding that works, not just looks." />
           <meta name="keywords" content="branding case studies, brand identity case studies, logo design portfolio, brand strategy examples" />
-          <link rel="canonical" href="https://brandingtactics.com/CaseStudy" />
+          <link rel="canonical" href="https://brandingtactics.com/caseStudy" />
           <meta property="og:title" content="Case Studies - Branding Tactics" />
           <meta property="og:description" content="Real brands, real results: Our client success stories demonstrating effective branding strategies." />
           <meta property="og:type" content="website" />
-          <meta property="og:url" content="https://brandingtactics.com/CaseStudy" />
+          <meta property="og:url" content="https://brandingtactics.com/caseStudy" />
           <meta property="og:image" content="https://brandingtactics.com/og-case-studies.jpg" />
           <script type="application/ld+json">
             {JSON.stringify(organizationSchema)}
@@ -229,6 +230,7 @@ const CaseStudy = () => {
                 client={client}
                 index={index}
                 colorVariant={colorVariants[index % colorVariants.length]}
+                getSlugFromName={getSlugFromName}
               />
             ))}
           </div>
