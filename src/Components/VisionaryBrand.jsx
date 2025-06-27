@@ -24,7 +24,7 @@ const organizationSchema = {
 };
 
 const clientLogos = [
-  "/client logo/logo1.png",
+  // "/client logo/logo1.png",
   "/client logo/logo2.png",
   "/client logo/logo3.png",
   "/client logo/logo4.png",
@@ -34,15 +34,15 @@ const clientLogos = [
   "/client logo/logo8.jpg",
   "/client logo/logo9.png",
   "/client logo/logo10.jpeg",
-  "/client logo/logo11.png",
-  "/client logo/logo12.png",
+  // "/client logo/logo11.png",
+  // "/client logo/logo12.png",
   "/client logo/logo13.png",
-  "/client logo/logo14.jpg",
+  // "/client logo/logo14.jpg",
   "/client logo/logo15.png",
   "/client logo/logo16.png",
   "/client logo/logo17.jpg",
-  "/client logo/logo18.png",
-  "/client logo/logo19.png",
+  // "/client logo/logo18.png",
+  // "/client logo/logo19.png",
   "/client logo/logo20.png",
 ];
 

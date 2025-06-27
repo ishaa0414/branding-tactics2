@@ -5,7 +5,7 @@ import fizmaa from '/Home/Fizmaa-home.png';
 import acrements from '/Home/Acrements-home.png';
 
 const ProjectHome = () => {
-  const { clients } = useCaseStudyContext();
+  const { clients, getSlugFromName } = useCaseStudyContext(); // Added getSlugFromName
   const [fizmaaProject, setFizmaaProject] = useState(null);
   const [acrementsProject, setAcrementsProject] = useState(null);
   const [showMoreFizmaa, setShowMoreFizmaa] = useState(false);
@@ -13,7 +13,7 @@ const ProjectHome = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Find the projects with IDs 6 (Acrements) and 7 (Fizmaa)
+    // Find the projects with IDs 1 (Fizmaa) and 2 (Acrements)
     const fizmaaData = clients.find(client => client.id === 1);
     const acrementsData = clients.find(client => client.id === 2);
     
@@ -22,11 +22,13 @@ const ProjectHome = () => {
   }, [clients]);
 
   const handleViewAllCaseStudies = () => {
-    navigate('/CaseStudy');
+    navigate('/caseStudy'); // Updated to match CaseStudy component route
   };
 
-  const navigateToCaseStudy = (id) => {
-    navigate(`/CaseStudy/${id}`);
+  // Updated to use slug navigation instead of ID
+  const navigateToCaseStudy = (clientName) => {
+    const slug = getSlugFromName(clientName);
+    navigate(`/caseStudy/${slug}`); // Updated to match CaseStudy component route pattern
   };
 
   return (
@@ -49,13 +51,13 @@ const ProjectHome = () => {
                 
                 <div className="text-[#AAAAAA]">
                   <p className="mb-4">
-                  Fizmaa, founded by Tejas Jadhav and Manthan Chajjed, students from Oxford University, is redefining how Indians book events. Designed as a bold, intuitive, and user-friendly platform, Fizmaa simplifies event planning by connecting everyday people with trusted vendors, making the entire process seamless and stress-free.
+                  Fizmaa, founded by Tejas Jadhav and Manthan Chajjed, students from Oxford University, is redefining how Indians book events. Designed as a bold, intuitive, and user-friendly platform, Fizmaa simplifies event planning by connecting everyday people with trusted vendors, making the entire process seamless and stress-free.
                   </p>
                   
                   {showMoreFizmaa && (
                     <div className="mt-4">
                       <p className="mb-2">
-                      We have built a unique brand identity that feels bold, exciting, and safe for their target audience. The energetic red palette conveys passion and celebration, while the minimal yet powerful design ensures clarity, ease, and confidence. Fizmaa’s friendly yet professional tone makes event planning effortless, creating a space where users feel empowered and vendors can thrive.
+                      We have built a unique brand identity that feels bold, exciting, and safe for their target audience. The energetic red palette conveys passion and celebration, while the minimal yet powerful design ensures clarity, ease, and confidence. Fizmaa's friendly yet professional tone makes event planning effortless, creating a space where users feel empowered and vendors can thrive.
                       </p>
                     </div>
                   )}
@@ -69,7 +71,7 @@ const ProjectHome = () => {
                     </button>
                     
                     <button 
-                      onClick={() => navigateToCaseStudy(fizmaaProject.id)}
+                      onClick={() => navigateToCaseStudy(fizmaaProject.name)} // Updated to use name instead of id
                       className="border border-teal-400 rounded-full px-6 py-2 text-white hover:bg-teal-400/20 transition duration-300"
                     >
                       View Project
@@ -121,7 +123,7 @@ const ProjectHome = () => {
           {showMoreAcrements && (
             <div className="mt-4">
               <p className="mb-2">
-              Central to this strategy was a custom Wordmark for “Sam,” designed with refined typography and distinctive elements that reflect the brand's commitment to quality and sophistication. This identity, paired with a curated color palette and comprehensive brand guidelines, ensures every touchpoint exudes exclusivity and premium care.
+              Central to this strategy was a custom Wordmark for "Sam," designed with refined typography and distinctive elements that reflect the brand's commitment to quality and sophistication. This identity, paired with a curated color palette and comprehensive brand guidelines, ensures every touchpoint exudes exclusivity and premium care.
               </p>
             </div>
           )}
@@ -135,7 +137,7 @@ const ProjectHome = () => {
             </button>
             
             <button
-              onClick={() => navigateToCaseStudy(acrementsProject.id)}
+              onClick={() => navigateToCaseStudy(acrementsProject.name)} // Updated to use name instead of id
               className="border border-teal-400 rounded-full px-6 py-2 text-white hover:bg-teal-400/20 transition duration-300"
             >
               View Project
